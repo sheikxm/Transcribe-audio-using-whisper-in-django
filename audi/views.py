@@ -3,6 +3,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 import requests
 import time
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def index(request):
@@ -14,7 +17,7 @@ def transcribe_audio(request):
         transcription = request.POST.get('transcription', '')
 
         # Replace 'YOUR_WHISPER_API_KEY' with your actual Whisper ASR API key
-        api_key = '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'
+        api_key = os.getenv('OPENAI_API')
         api_url = 'https://api.openai.com/v1/audio/transcriptions'
 
         headers = {
