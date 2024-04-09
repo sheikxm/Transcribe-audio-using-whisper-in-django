@@ -16,11 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path , include
-from audi.views import index , transcribe_audio
+from audi.views import index , transcribe_audio, respondLLM
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',index,name='index'),
     path('transcribe/',transcribe_audio , name='transcribe_audio'),
-    
+    path('llm_response/',respondLLM , name='respondLLM'),
 ]
