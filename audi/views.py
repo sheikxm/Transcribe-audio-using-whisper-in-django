@@ -4,6 +4,7 @@ from django.http import JsonResponse
 import requests
 import time
 import os
+import replicate
 import json
 from dotenv import load_dotenv
 from django.views.decorators.csrf import csrf_exempt
@@ -13,12 +14,12 @@ load_dotenv()
 def index(request):
     return render(request, 'index.html')
 
+
 @csrf_exempt
-def respondLLM(request):
+def respondLLMGPT(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         text = data.get('text')
-        print('text is ',text)
         api_key = os.getenv('OPENAI_API')
         api_url = 'https://api.openai.com/v1/chat/completions'
         headers = {
@@ -37,7 +38,7 @@ def respondLLM(request):
       }
             ],
         }
-        print(data)
+
         try:
             response = requests.post(
                 api_url, headers=headers, json=data)
@@ -47,6 +48,33 @@ def respondLLM(request):
             return JsonResponse({'response': result['choices'][0]['message']})
         except requests.exceptions.RequestException as e:
             return JsonResponse({'error': f'Error during transcription: {e}'})
+    
+    return JsonResponse({'error': 'Invalid request method'})
+
+
+
+@csrf_exempt
+def respondLLM(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        text = data.get('text')
+        replicateApi = replicate.Client(api_token=os.getenv("REPLICATE_API_TOKEN"))
+        
+        output =replicateApi.run( "meta/llama-2-13b-chat", input={
+          "debug": False,
+          "top_p": 1,
+          "prompt": text,
+          "temperature": 0.75,
+          "system_prompt": "You are a helpful assistant for a meeting",
+          "max_new_tokens": 300,
+          "min_new_tokens": -1,
+          "prompt_template": "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{prompt} [/INST]",
+          "repetition_penalty": 1},)
+        output_variable = ""
+        for item in output:
+            output_variable += item
+
+        return JsonResponse({'response': output_variable})
     
     return JsonResponse({'error': 'Invalid request method'})
 

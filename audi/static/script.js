@@ -102,7 +102,7 @@ $(document).ready(function() {
                   return data.json(); // Return the promise here
                 })
                 .then(response => {
-                  console.log(response); // Log the parsed JSON response here
+                  console.log(response['response']); // Log the parsed JSON response here
                 })
                 .catch(e => {
                   console.log('ERROR', e);
