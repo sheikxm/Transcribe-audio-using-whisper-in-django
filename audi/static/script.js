@@ -6,6 +6,8 @@ $(document).ready(function() {
     const sendButton = $('#sendButton');
     const clearAllButton = $('#clearAllButton');
     const displayText = $('#displayText');
+    const clicktoaskLLM = $('#clicktoaskLLM');
+    
     const sentMessagesContainer = $('#sentMessagesContainer');
      // Toggle between day and night modes
     const toggleModeButton = $('#toggleModeButton');
@@ -81,7 +83,32 @@ $(document).ready(function() {
                 clearButton.prop('disabled', false);
             }
         });
-
+        clicktoaskLLM.click(function(){
+            //const question = $("#LLMquestion").val();
+            if(audioInput.val())  $("#LLMquestion").val(audioInput.val())
+            const question = $("#LLMquestion").val() || audioInput.val();
+            const options = {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({text: question}),
+                };
+                fetch('llm_response/', options)
+                .then(data => {
+                  if (!data.ok) {
+                    throw Error(data.status);
+                  }
+                  return data.json(); // Return the promise here
+                })
+                .then(response => {
+                  console.log(response['response']); // Log the parsed JSON response here
+                })
+                .catch(e => {
+                  console.log('ERROR', e);
+                });
+              
+        })
         sendButton.click(function() {
             // Process the transcribed text and send the message
             const transcribedText = audioInput.val();
@@ -91,7 +118,7 @@ $(document).ready(function() {
             appendMessage(message);
             storedMessages.push(message);
             localStorage.setItem('sentMessages', JSON.stringify(storedMessages));
-
+            
             // Clear the transcription area
             audioInput.val('');
             displayText.text('');
